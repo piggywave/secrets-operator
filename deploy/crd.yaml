@@ -31,6 +31,10 @@ spec:
                   enum:
                     - 2048
                     - 4096
+                publicKey:
+                  type: string
+                privateKey:
+                  type: string
   # 可以是 Namespaced 或 Cluster
   scope: Namespaced
   names:

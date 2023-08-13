@@ -1,0 +1,15 @@
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: shell-operator
+spec:
+  containers:
+  - name: shell-operator
+    image: piggywave/shell-operator:v1
+    imagePullPolicy: Never
+    env:
+    - name: DEBUG_KEEP_TMP_FILES
+      value: "yes"
+    ports:
+    - containerPort: 9115
