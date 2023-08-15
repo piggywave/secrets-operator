@@ -10,6 +10,6 @@ spec:
     imagePullPolicy: Never
     env:
     - name: DEBUG_KEEP_TMP_FILES
-      value: "yes"
+      value: "no"
     ports:
     - containerPort: 9115

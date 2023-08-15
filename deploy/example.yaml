@@ -1,3 +1,16 @@
+---
+apiVersion: "stable.example.com/v1"
+kind: RSA
+metadata:
+  name: test
+spec:
+  name: test
+  namespace: 
+  - default
+  length: 2048
+  publicKey: public
+  privateKey: private
+---
 apiVersion: "stable.example.com/v1"
 kind: KeyPair
 metadata:
