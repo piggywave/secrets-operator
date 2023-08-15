@@ -3,8 +3,7 @@
 import sys, base64, os, json
 import rsa
 from kubernetes import config, client
-from typing import Dict
-
+from typing import Dict, Any
 
 hooks = '''
 {
@@ -28,11 +27,23 @@ hooks = '''
 }
 '''
 
-class RSARequest:
-    def __init__(self, data: Dict[str, any]) -> None:
+class Secret:
+    def __init__(self, data: Dict[str, Any]) -> None:
         self.mode = data['watchEvent']
         self.name = data['object']['spec']['name']
         self.namespace = data['object']['spec']['namespace']
+
+    def delete_secrets(self, v1: client.CoreV1Api):
+        for ns in self.namespace:
+            try:
+                v1.delete_namespaced_secret(name=self.name, namespace=ns)
+            except client.ApiException as e:
+                print(e)
+
+
+class RSARequest(Secret):
+    def __init__(self, data: Dict[str, Any]) -> None:
+        super().__init__(data)
         self.length = data['object']['spec']['length']
         self.public_key = data['object']['spec']['publicKey']
         self.private_key = data['object']['spec']['privateKey']
@@ -55,17 +66,11 @@ class RSARequest:
                     except client.ApiException as e:
                         print(e)
             case "Deleted":
-                for ns in self.namespace:
-                    try:
-                        v1.delete_namespaced_secret(name=self.name, namespace=ns)
-                    except client.ApiException as e:
-                        print(e)
+                self.delete_secrets(v1)
 
-class KeyPair:
-    def __init__(self, data: Dict[str, any]) -> None:
-        self.mode = data['watchEvent']
-        self.name = data['object']['spec']['name']
-        self.namespace = data['object']['spec']['namespace']
+class KeyPair(Secret):
+    def __init__(self, data: Dict[str, Any]) -> None:
+        super().__init__(data)
         self.pairs = data['object']['spec']['data']
 
     def keypair_gen(self):
@@ -84,11 +89,7 @@ class KeyPair:
                     except client.ApiException as e:
                         print(e)
             case "Deleted":
-                for ns in self.namespace:
-                    try:
-                        v1.delete_namespaced_secret(name=self.name, namespace=ns)
-                    except client.ApiException as e:
-                        print(e)
+                self.delete_secrets(v1)
 def main():
     if len(sys.argv) > 1 and sys.argv[1] == "--config":
         print(hooks)
